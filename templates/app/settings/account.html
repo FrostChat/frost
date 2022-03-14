@@ -61,6 +61,12 @@
                                             <!-- <button class="btn btn-purple" type="button" data-bs-toggle="modal" data-bs-target="#username-change-modal">Edit</button> -->
                                         </div>
 
+                                        <label class="form-label">User ID</label>
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" value="{{ self_user.id }}" style="background-color: #0000001f; border: none; color: white; border-top-right-radius: 0px!important; border-bottom-right-radius: 0px!important;" readonly>
+                                            <button class="btn btn-purple" type="button" onclick="navigator.clipboard.writeText('{{ self_user.id }}')" style="border-top-left-radius: 0px!important; border-bottom-left-radius: 0px!important;">Copy</button>
+                                        </div>
+
                                         <label class="form-label">API Key</label>
                                         <div class="input-group">
                                             <input type="password" class="form-control" value="{{ self_user.api_key }}" style="background-color: #0000001f; border: none; color: white; border-top-right-radius: 0px!important; border-bottom-right-radius: 0px!important;" readonly>
