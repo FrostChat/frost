@@ -65,6 +65,23 @@ function render_users(users, home_page = false) {
     });
 }
 
+function mute_user(user_id) {
+    fetch('/api/user/' + user_id + '/mute', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': self_user.api_key
+        }
+    }).then(response => {
+        if (response.ok) {
+            console.log("User muted");
+        } else {
+            alert("Error: " + response.statusText);
+        }
+    })
+
+}
+
 function add_notification(user_id) {
     let user_div = user_divs.find(x => x.user.id == user_id);
     let chat_notifications = user_div.card.getElementsByClassName('chat-notifications')[0];

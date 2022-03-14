@@ -1,7 +1,7 @@
 import flask
 import hashlib
 
-from utils.sqlite import Database, InvalidBio, UserNotFound
+from utils.sqlite import Database, InvalidBio, UserNotFound, UserMuted, UserNotMuted
 
 blueprint = flask.Blueprint('api', __name__, url_prefix='/api')
 
@@ -36,7 +36,7 @@ blueprint = flask.Blueprint('api', __name__, url_prefix='/api')
 
 #     return flask.jsonify({"success": "Username changed"})
 
-@blueprint.route('/user/<user_id>', methods=["GET", "PATCH"])
+@blueprint.get('/user/<user_id>')
 def get_user(user_id):
     api_key = flask.request.headers.get('Authorization')
     db = Database()
@@ -54,26 +54,150 @@ def get_user(user_id):
     if not user:
         return flask.jsonify({'error': 'User not found.'}), 404
 
-    if flask.request.method == "GET":
-        return flask.jsonify(user.to_json())
+    api_key_user = db.api_key_to_user(api_key)
+    if api_key_user.id != user.id:
+        is_user_muted = db.is_user_muted(api_key_user.id, user.id)
+        user.is_muted = is_user_muted
 
-    elif flask.request.method == "PATCH":
+    return flask.jsonify(user.to_json())
+
+@blueprint.patch('/user/<user_id>')
+def update_user(user_id):
+    api_key = flask.request.headers.get('Authorization')
+    api_user_id = api_key.split('.')[0]
+    db = Database()
+
+    if not db.valid_api_key(api_key):
+        return flask.jsonify({'error': 'Invalid API key.'}), 403
+
+    if user_id == "@me":
+        try:
+            user_id = api_key.split('.')[0]
+        except UserNotFound:
+            return flask.jsonify({'error': 'User not found.'}), 404
+    
+    user = db.get_user(user_id)
+    if not user:
+        return flask.jsonify({'error': 'User not found.'}), 404
+
+    if api_user_id == user.id:
         data = flask.request.get_json()
 
         if 'avatar_url' in data:
             db.change_user_avatar_url(data['avatar_url'], user.id)
-            return flask.jsonify({'success': 'Avatar URL changed.'})
         
         if 'website' in data:
             db.change_user_website(data['website'], user.id)
-            return flask.jsonify({'success': 'Website changed.'})
 
         if 'bio' in data:
             try:
                 db.change_user_bio(data['bio'], user.id)
-                return flask.jsonify({'success': 'Bio changed.'})
             except InvalidBio:
                 return flask.jsonify({'error': 'Bio is greater than 200 characters.'}), 400
+
+        return flask.jsonify({'success': 'Updated your profile.'}), 200
+
+    return flask.jsonify({'error': 'You do not have permission to update this user.'}), 403
+
+# @blueprint.route('/user/<user_id>', methods=["GET", "PATCH"])
+# def get_user(user_id):
+#     api_key = flask.request.headers.get('Authorization')
+#     db = Database()
+
+#     if not db.valid_api_key(api_key):
+#         return flask.jsonify({'error': 'Invalid API key.'}), 403
+
+#     if user_id == "@me":
+#         try:
+#             user_id = api_key.split('.')[0]
+#         except UserNotFound:
+#             return flask.jsonify({'error': 'User not found.'}), 404
+    
+#     user = db.get_user(user_id)
+#     if not user:
+#         return flask.jsonify({'error': 'User not found.'}), 404
+
+#     api_key_user = db.api_key_to_user(api_key)
+#     if api_key_user.id != user.id:
+#         is_user_muted = db.is_user_muted(api_key_user.id, user.id)
+#         user.is_muted = is_user_muted
+
+#     if flask.request.method == "GET":
+#         return flask.jsonify(user.to_json())
+
+#     elif flask.request.method == "PATCH":
+#         data = flask.request.get_json()
+
+#         if user.id != api_key_user.id:
+#             return flask.jsonify({'error': 'You can only update your own profile.'}), 403
+
+#         else:
+#             if 'avatar_url' in data:
+#                 db.change_user_avatar_url(data['avatar_url'], user.id)
+#                 return flask.jsonify({'success': 'Avatar URL changed.'})
+            
+#             if 'website' in data:
+#                 db.change_user_website(data['website'], user.id)
+#                 return flask.jsonify({'success': 'Website changed.'})
+
+#             if 'bio' in data:
+#                 try:
+#                     db.change_user_bio(data['bio'], user.id)
+#                     return flask.jsonify({'success': 'Bio changed.'})
+#                 except InvalidBio:
+#                     return flask.jsonify({'error': 'Bio is greater than 200 characters.'}), 400
+
+@blueprint.post("/user/<user_id>/mute")
+def mute_user(user_id):
+    api_key = flask.request.headers.get('Authorization')
+    api_user_id = api_key.split('.')[0]
+    db = Database()
+
+    if not db.valid_api_key(api_key):
+        return flask.jsonify({'error': 'Invalid API key.'}), 403
+
+    if user_id == api_user_id:
+        return flask.jsonify({'error': 'You cannot mute yourself.'}), 403
+
+    user = db.get_user(user_id)
+    if not user:
+        return flask.jsonify({'error': 'User not found.'}), 404
+
+    if db.is_user_muted(api_user_id, user.id):
+        return flask.jsonify({'error': 'User is already muted.'}), 400
+    
+    try:
+        db.mute_user(api_user_id, user.id)
+    except UserMuted:
+        return flask.jsonify({'error': 'User is already muted.'}), 400
+
+    return flask.jsonify({'success': 'User muted.'})
+
+@blueprint.post("/user/<user_id>/unmute")
+def unmute_user(user_id):
+    api_key = flask.request.headers.get('Authorization')
+    api_user_id = api_key.split('.')[0]
+    db = Database()
+
+    if not db.valid_api_key(api_key):
+        return flask.jsonify({'error': 'Invalid API key.'}), 403
+
+    if user_id == api_user_id:
+        return flask.jsonify({'error': 'You cannot mute yourself.'}), 403
+
+    user = db.get_user(user_id)
+    if not user:
+        return flask.jsonify({'error': 'User not found.'}), 404
+
+    if not db.is_user_muted(api_user_id, user.id):
+        return flask.jsonify({'error': 'User is not muted.'}), 400
+
+    try:
+        db.unmute_user(api_user_id, user.id)
+    except UserNotMuted:
+        return flask.jsonify({'error': 'User is not muted.'}), 400
+
+    return flask.jsonify({'success': 'User unmuted.'})
 
 # @blueprint.route('/user/<user_id>/messages')
 # def get_messages(user_id):

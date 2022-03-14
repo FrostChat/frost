@@ -96,6 +96,22 @@ function open_user_contextmenu(event, user_obj) {
     const { clientX: mouseX, clientY: mouseY } = event;
     const { normalizedX, normalizedY } = normalizePozition(mouseX, mouseY);
 
+    let mute_user_div = document.createElement('div');
+    mute_user_div.classList.add('item');
+    if (user_obj.is_muted) {
+        mute_user_div.innerText = 'Unmute';
+        mute_user_div.addEventListener('click', function () {
+            unmute_user(user_obj);
+            close_contextmenu();
+        });
+    } else {
+        mute_user_div.innerText = 'Mute';
+        mute_user_div.addEventListener('click', function () {
+            mute_user(user_obj);
+            close_contextmenu();
+        });
+    }
+
     let view_profile_div = document.createElement('div');
     view_profile_div.classList.add('item');
     view_profile_div.innerText = 'View profile';
@@ -126,6 +142,7 @@ function open_user_contextmenu(event, user_obj) {
     contextMenu.style.top = `${normalizedY}px`;
     contextMenu.style.left = `${normalizedX}px`;
 
+    contextMenu.appendChild(mute_user_div);
     contextMenu.appendChild(view_profile_div);
     contextMenu.appendChild(copy_id_div);
     if (get_notifications(user_obj.id) > 0) { 

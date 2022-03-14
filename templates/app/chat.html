@@ -86,9 +86,9 @@
         </div>
 
         <script>
-            var self_user = "{{ self_user.to_json(show_api_key=True) }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"");
-            var user = "{{ user.to_json() }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"");
-            var users = "{{ users_json }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"");
+            var self_user = "{{ self_user.to_json(show_api_key=True) }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace("False", "false").replace("True", "true").replace("None", "null");
+            var user = "{{ user.to_json() }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace("False", "false").replace("True", "true").replace("None", "null");
+            var users = "{{ users_json }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace("False", "false").replace("True", "true").replace("None", "null");
             var messages = "{{ messages_json }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace(/&#34;/g, "\"");
             
             self_user = JSON.parse(self_user);
