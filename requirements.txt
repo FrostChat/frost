@@ -1,0 +1,3 @@
+flask
+python-socketio
+flask_mobility
