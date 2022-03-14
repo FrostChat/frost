@@ -34,9 +34,12 @@ socket.on('message', function(data) {
         }
     } catch {}
 
-    if (!document.hasFocus()) {
+    if (!document.hasFocus() || data.author_id != user.id) {
         try {
-            new Audio('/static/sounds/new-message.mp3').play();
+            if (data.receiver_id != user.id && data.author_id != self_user.id) {
+                let audio = new Audio('/static/audio/notification.mp3');
+                audio.play();
+            }
         } catch {}
         add_notification(data.author_id);
     }
