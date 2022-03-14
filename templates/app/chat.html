@@ -58,14 +58,15 @@
                         </div>
                     </div>
     
-                    <div id="messages-container" class="container chat-messages"></div>
+                    <div id="messages-container" class="chat-messages"></div>
     
-                    <div class="message-box-wrapper" onclick="document.getElementById('message-box').focus" style="position: absolute; bottom: 0; left: 0; right: 0;">
+                    <div class="message-box-wrapper" onclick="document.getElementById('message-box').focus" style="position: absolute; bottom: 0; left: 0; right: 0; display: flex;">
                         {% if self_user.id == user.id %}
                         <input type="text" class="message-box" id="message-box" placeholder="You can't message yourself." autofocus readonly>
                         {% else %}
                         <input type="text" class="message-box" id="message-box" placeholder="Message {{ user.username }}..." autofocus>
                         {% endif %}
+                        <div onclick="send_message()" style="width: 35px; margin-right: 15px; background-color: #ffffff38; -webkit-mask: url(/static/images/send.svg) no-repeat center; mask: url(/static/images/send.svg) no-repeat center; cursor: pointer;"></div>
                     </div>
                 </div>
             </div>
