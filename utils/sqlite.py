@@ -10,6 +10,8 @@ class InvalidPassword(Exception): pass
 class InvalidUsername(Exception): pass
 class UserExists(Exception): pass
 class UserNotFound(Exception): pass
+class UserMuted(Exception): pass
+class UserNotMuted(Exception): pass
 class MessageNotFound(Exception): pass
 class EmptyMessage(Exception): pass
 class InvalidBio(Exception): pass
@@ -23,6 +25,7 @@ class User:
         self.bio = bio
         self.website = website
         self.hash = hash
+        self.is_muted = False
 
         self.bio = self.bio.replace("\n", "{newline}")
 
@@ -47,6 +50,7 @@ class User:
             "avatar_url": self.avatar_url,
             "bio": self.bio,
             "website": self.website,
+            "is_muted": self.is_muted,
             "api_key": self.api_key if show_api_key else "",
             "hash": self.hash if show_hash else ""
         }
@@ -78,6 +82,9 @@ class Database:
 
         self.database.execute('CREATE TABLE IF NOT EXISTS users (username TEXT, hash TEXT, id TEXT, api_key TEXT, avatar_url TEXT, bio TEXT, website TEXT)')
         self.database.execute('CREATE TABLE IF NOT EXISTS messages (id TEXT, content TEXT, author_id TEXT, receiver_id TEXT, timestamp TEXT)')
+        self.database.execute('CREATE TABLE IF NOT EXISTS muted_users (user_id TEXT, muted_user_id TEXT)')
+        self.database.execute('CREATE TABLE IF NOT EXISTS blocked_users (user_id TEXT, blocked_user_id TEXT)')
+        self.database.execute('CREATE TABLE IF NOT EXISTS friends (user_id TEXT, friend_id TEXT)')
 
     def close(self) -> None:
         self.database.close()
@@ -111,6 +118,38 @@ class Database:
         user_id = Database.get_user_id(username)
 
         return user_id + "." + base64.b64encode(salt.encode('utf-8')).decode('utf-8')
+
+    def mute_user(self, user_id: str, user_to_mute_id: str) -> None:
+        """Mute a user."""
+
+        if self.is_user_muted(user_id, user_to_mute_id):
+            raise UserMuted("User is already muted.")
+
+        self.database.execute('INSERT INTO muted_users (user_id, muted_user_id) VALUES (?, ?)', (user_id, user_to_mute_id))
+        self.database.commit()
+
+    def unmute_user(self, user_id: str, user_to_unmute_id: str) -> None:
+        """Unmute a user."""
+
+        if not self.is_user_muted(user_id, user_to_unmute_id):
+            raise UserNotMuted("User is not muted.")
+
+        self.database.execute('DELETE FROM muted_users WHERE user_id = ? AND muted_user_id = ?', (user_id, user_to_unmute_id))
+        self.database.commit()
+
+    def set_user_muted(self, user_id: str, user_to_mute_id: str, muted: bool) -> None:
+        """Set a user's muted status."""
+
+        if muted:
+            self.mute_user(user_id, user_to_mute_id)
+        else:
+            self.unmute_user(user_id, user_to_mute_id)
+
+    def is_user_muted(self, user_id: str, muted_user_id: str) -> bool:
+        """Check if a user is muted."""
+
+        is_muted = self.database.execute('SELECT * FROM muted_users WHERE user_id = ? AND muted_user_id = ?', (user_id, muted_user_id)).fetchone()
+        return True if is_muted else False
 
     def add_user(self, username: str, password: str, avatar_url: str = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png", bio: str = "", website: str = "") -> User:
         """Adds a user to the database."""
