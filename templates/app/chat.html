@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Chat App</title>
+        
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#181717">
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="manifest" href="manifest.json" />
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/bbd7036ee1.js" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    
+        <style>
+            @media screen and (max-width: 800px) {
+                .chats-wrapper {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+    <body class="m-0">
+        <div id="context-menu"></div>
+
+        <div class="row" style="height: 100vh;">
+            <div class="col-lg-3 col-md-4 col-sm-0 h-100 p-0 chats-wrapper" style="position: relative;">
+                <div class="mb-2 p-3 search-box-wrapper">
+                    <div class="input-group">
+                        <input type="text" class="form-control search-box" placeholder="Start a chat with someone..." id="start-chat-input">
+                    </div>                          
+                </div>
+                <div class="px-3 pt-2" style="padding-left: 1.5rem!important;">
+                    <div class="row" id="users-container"></div>
+                </div>
+                <div class="account-nav-wrapper">
+                    <div class="account-nav-inner">
+                        <img src="{{ self_user.avatar_url }}" class="account-nav-avatar">
+                        <h5 class="m-0 p-0">{{ self_user.username }}</h5>
+                        <div style="margin-left: auto;">
+                            <a href="/app/settings" class="btn btn-dark" style="background-color: #252525!important;"><i class="fa-solid fa-gear"></i></a>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+            <div class="col-lg-9 col-md-8 col-sm-12 h-100 p-0 messages-wrapper" style="background-color: #171717; position: relative;">
+                <div class="chat-wrapper">
+                    <div class="chat-header-with-close">
+                        <h5 class="m-0 p-0" onclick="view_profile('{{ user.id }}')" style="cursor: pointer; margin-left: 10px!important;">{{ user.username }}</h5>
+                        <div class="mobile-nav">
+                            <a href="/app" class="btn btn-dark" style="background-color: #252525!important;"><i class="fa-solid fa-house"></i></a>
+                        </div>
+                        <div class="desktop-nav">
+                            <a href="/app" class="btn btn-dark" style="background-color: #252525!important;"><i class="fa-solid fa-xmark fa-flip-horizontal"></i></a>
+                        </div>
+                    </div>
+    
+                    <div id="messages-container" class="container chat-messages"></div>
+    
+                    <div class="message-box-wrapper" onclick="document.getElementById('message-box').focus" style="position: absolute; bottom: 0; left: 0; right: 0;">
+                        {% if self_user.id == user.id %}
+                        <input type="text" class="message-box" id="message-box" placeholder="You can't message yourself." autofocus readonly>
+                        {% else %}
+                        <input type="text" class="message-box" id="message-box" placeholder="Message {{ user.username }}..." autofocus>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" tabindex="-1" id="profile-viewer">
+            <div class="modal-dialog">
+                <fieldset class="profile-viewer">
+                    <legend>
+                        <img id="profile-viewer-avatar">
+                    </legend>
+                    <h5 class="modal-title" id="profile-viewer-title"></h5>
+                    <hr id="profile-viewer-bio-divider">
+                    <p class="m-0" id="profile-viewer-bio"></p>
+                </fieldset>
+            </div>
+        </div>
+
+        <script>
+            var self_user = "{{ self_user.to_json(show_api_key=True) }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"");
+            var user = "{{ user.to_json() }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"");
+            var users = "{{ users_json }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"");
+            var messages = "{{ messages_json }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace(/&#34;/g, "\"");
+            
+            self_user = JSON.parse(self_user);
+            user = JSON.parse(user);
+            users = JSON.parse(users);
+            messages = JSON.parse(messages);
+
+            messages.forEach(msg => {
+                msg.content = msg.content.replace(`\"`, `'`);
+            })
+
+            var message_box = document.getElementById('message-box');
+            var message_container = document.getElementById('messages-container');
+            var message_divs = [];
+            var context_menus = [];
+
+            message_container.scrollTop = message_container.scrollHeight;
+
+            // scroll down till user's div is in view
+            function scroll_to_user_div(user_id) {
+                let user_div = document.getElementById(`user-${user_id}`);
+                users_container.scrollTo(0, user_div.offsetTop - users_container.offsetTop);
+            }
+
+            setTimeout(() => {
+                // scroll to user div
+                scroll_to_user_div(user.id);
+            }, 100);
+        </script>
+        <script src="/static/js/search-box.js"></script>
+        <script src="/static/js/context-menu.js"></script>
+        <script src="/static/js/users.js"></script>
+        <script src="/static/js/socket.js"></script>
+        <script src="/static/js/messages.js"></script>
+        <script src="/static/js/profile-view.js"></script>
+        <script>
+            render_messages(messages);
+            render_users(users);
+            reset_notifications_loop();
+        </script>
+    </body>
+</html>

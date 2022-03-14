@@ -1,0 +1,12 @@
+{
+    "name": "benny chat app",
+    "short_name": "benny chat app",
+    "description": "test pwa and flask",
+    "theme_color": "#181717",
+    "background_color": "#181717",
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/",
+    "start_url": "/",
+    "icons": []
+  }
