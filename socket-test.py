@@ -1,7 +1,7 @@
 import socketio
 
 sio = socketio.Client()
-sio.connect('http://0.0.0.0:5000')
+sio.connect('http://0.0.0.0:8000')
 sio.emit('authenticate', {"api_key": "QmVubnk=.R1B6a3ZSUFIyMDhTOGFDVQ=="})
 
 @sio.on('authenticated')
