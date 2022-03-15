@@ -70,7 +70,21 @@
         <script src="/static/js/profile-view.js"></script>
         <script>
             render_users(users, true);
-            reset_notifications_loop();
+            function reset_notifs_loop() {
+                if (document.hasFocus()) {
+                    for (let i = 0; i < users.length; i++) {
+                            if (get_notifications(users[i].id) <= 0) {
+                                reset_notifications(users[i].id);
+                            }
+                        }
+                    }
+
+                setTimeout(function() {
+                    reset_notifs_loop();
+                }, 1000);
+            }
+
+            reset_notifs_loop();
         </script>
     </body>
 </html>
