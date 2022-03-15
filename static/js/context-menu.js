@@ -130,7 +130,7 @@ function open_user_contextmenu(event, user_obj) {
 
     let clear_notifications_div = document.createElement('div');
     clear_notifications_div.classList.add('item');
-    clear_notifications_div.innerText = 'Clear notifications';
+    clear_notifications_div.innerText = 'Mark as read';
 
     clear_notifications_div.addEventListener('click', () => {
         reset_notifications(user_obj.id);
@@ -142,12 +142,12 @@ function open_user_contextmenu(event, user_obj) {
     contextMenu.style.top = `${normalizedY}px`;
     contextMenu.style.left = `${normalizedX}px`;
 
-    contextMenu.appendChild(mute_user_div);
-    contextMenu.appendChild(view_profile_div);
-    contextMenu.appendChild(copy_id_div);
     if (get_notifications(user_obj.id) > 0) { 
         contextMenu.appendChild(clear_notifications_div);
     }
+    contextMenu.appendChild(mute_user_div);
+    contextMenu.appendChild(view_profile_div);
+    contextMenu.appendChild(copy_id_div);
 
     setTimeout(() => {
         contextMenu.classList.add("visible");
