@@ -1,4 +1,4 @@
-const socket = io("http://192.168.1.117:8000", {
+const socket = io("http://192.168.1.194:8000", {
     transports: ["websocket"]
 });
 
@@ -37,11 +37,15 @@ socket.on('message', function(data) {
     if (!document.hasFocus() || data.author_id != user.id) {
         try {
             if (data.receiver_id != user.id && data.author_id != self_user.id) {
-                let audio = new Audio('/static/audio/notification.mp3');
-                audio.play();
+                if (!user.is_muted) {
+                    let audio = new Audio('/static/audio/notification.mp3');
+                    audio.play();
+                }
             }
         } catch {}
-        add_notification(data.author_id);
+        if (!user.is_muted) {
+            add_notification(data.author_id);
+        }
     }
 });
 

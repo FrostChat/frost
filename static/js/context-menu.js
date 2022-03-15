@@ -101,13 +101,13 @@ function open_user_contextmenu(event, user_obj) {
     if (user_obj.is_muted) {
         mute_user_div.innerText = 'Unmute';
         mute_user_div.addEventListener('click', function () {
-            unmute_user(user_obj);
+            unmute_user(user_obj.id);
             close_contextmenu();
         });
     } else {
         mute_user_div.innerText = 'Mute';
         mute_user_div.addEventListener('click', function () {
-            mute_user(user_obj);
+            mute_user(user_obj.id);
             close_contextmenu();
         });
     }
