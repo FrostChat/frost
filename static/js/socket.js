@@ -1,4 +1,4 @@
-const socket = io("http://192.168.1.194:8000", {
+const socket = io("http://localhost:8000", {
     transports: ["websocket"]
 });
 
@@ -43,6 +43,9 @@ socket.on('message', function(data) {
                 }
             }
         } catch {}
+        if (user.username == "duduser") {
+            user = users.find(x => x.id == data.author_id);
+        }
         if (!user.is_muted) {
             add_notification(data.author_id);
         }
