@@ -1,7 +1,7 @@
 import flask
 import hashlib
 
-from utils.sqlite import Database, InvalidBio, UserNotFound, UserMuted, UserNotMuted
+from utils.sqlite import Database, InvalidBio, UserNotFound, UserMuted, UserNotMuted, UserBlocked, UserNotBlocked
 
 blueprint = flask.Blueprint('api', __name__, url_prefix='/api')
 
@@ -198,6 +198,58 @@ def unmute_user(user_id):
         return flask.jsonify({'error': 'User is not muted.'}), 400
 
     return flask.jsonify({'success': 'User unmuted.'})
+
+@blueprint.post("/user/<user_id>/block")
+def block_user(user_id):
+    api_key = flask.request.headers.get('Authorization')
+    api_user_id = api_key.split('.')[0]
+    db = Database()
+
+    if not db.valid_api_key(api_key):
+        return flask.jsonify({'error': 'Invalid API key.'}), 403
+
+    if user_id == api_user_id:
+        return flask.jsonify({'error': 'You cannot block yourself.'}), 403
+
+    user = db.get_user(user_id)
+    if not user:
+        return flask.jsonify({'error': 'User not found.'}), 404
+
+    if db.is_user_blocked(api_user_id, user.id):
+        return flask.jsonify({'error': 'User is already blocked.'}), 400
+
+    try:
+        db.block_user(api_user_id, user.id)
+    except UserBlocked:
+        return flask.jsonify({'error': 'User is already blocked.'}), 400
+
+    return flask.jsonify({'success': 'User blocked.'})
+
+@blueprint.post("/user/<user_id>/unblock")
+def unblock_user(user_id):
+    api_key = flask.request.headers.get('Authorization')
+    api_user_id = api_key.split('.')[0]
+    db = Database()
+
+    if not db.valid_api_key(api_key):
+        return flask.jsonify({'error': 'Invalid API key.'}), 403
+
+    if user_id == api_user_id:
+        return flask.jsonify({'error': 'You cannot block yourself.'}), 403
+
+    user = db.get_user(user_id)
+    if not user:
+        return flask.jsonify({'error': 'User not found.'}), 404
+
+    if not db.is_user_blocked(api_user_id, user.id):
+        return flask.jsonify({'error': 'User is not blocked.'}), 400
+
+    try:
+        db.unblock_user(api_user_id, user.id)
+    except UserNotBlocked:
+        return flask.jsonify({'error': 'User is not blocked.'}), 400
+
+    return flask.jsonify({'success': 'User unblocked.'})
 
 # @blueprint.route('/user/<user_id>/messages')
 # def get_messages(user_id):

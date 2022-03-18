@@ -12,6 +12,8 @@ class UserExists(Exception): pass
 class UserNotFound(Exception): pass
 class UserMuted(Exception): pass
 class UserNotMuted(Exception): pass
+class UserBlocked(Exception): pass
+class UserNotBlocked(Exception): pass
 class MessageNotFound(Exception): pass
 class EmptyMessage(Exception): pass
 class InvalidBio(Exception): pass
@@ -150,6 +152,38 @@ class Database:
 
         is_muted = self.database.execute('SELECT * FROM muted_users WHERE user_id = ? AND muted_user_id = ?', (user_id, muted_user_id)).fetchone()
         return True if is_muted else False
+
+    def block_user(self, user_id: str, user_to_block_id: str) -> None:
+        """Block a user."""
+
+        if self.is_user_blocked(user_id, user_to_block_id):
+            raise UserBlocked("User is already blocked.")
+
+        self.database.execute('INSERT INTO blocked_users (user_id, blocked_user_id) VALUES (?, ?)', (user_id, user_to_block_id))
+        self.database.commit()
+
+    def unblock_user(self, user_id: str, user_to_unblock_id: str) -> None:
+        """Unblock a user."""
+
+        if not self.is_user_blocked(user_id, user_to_unblock_id):
+            raise UserNotBlocked("User is not blocked.")
+
+        self.database.execute('DELETE FROM blocked_users WHERE user_id = ? AND blocked_user_id = ?', (user_id, user_to_unblock_id))
+        self.database.commit()
+
+    def set_user_blocked(self, user_id: str, user_to_block_id: str, blocked: bool) -> None:
+        """Set a user's blocked status."""
+
+        if blocked:
+            self.block_user(user_id, user_to_block_id)
+        else:
+            self.unblock_user(user_id, user_to_block_id)
+
+    def is_user_blocked(self, user_id: str, blocked_user_id: str) -> bool:
+        """Check if a user is blocked."""
+
+        is_blocked = self.database.execute('SELECT * FROM blocked_users WHERE user_id = ? AND blocked_user_id = ?', (user_id, blocked_user_id)).fetchone()
+        return True if is_blocked else False
 
     def add_user(self, username: str, password: str, avatar_url: str = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png", bio: str = "", website: str = "") -> User:
         """Adds a user to the database."""
