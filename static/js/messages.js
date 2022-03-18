@@ -67,8 +67,18 @@ function add_message_div(message_obj) {
             message_div.classList.add('self');
         }
 
+        // if (message_obj.receiver_id == self_user.id) {
+        //     timestamp.style.marginRight = '10px';
+        //     outer_message_div.appendChild(timestamp);
+        // }
+        
         outer_message_div.appendChild(message_div);
-        // outer_message_div.appendChild(timestamp);
+
+        // if (message_obj.receiver_id != self_user.id) {
+        //     timestamp.style.marginLeft = '10px';
+        //     outer_message_div.appendChild(timestamp);
+        // }
+
         message_container.appendChild(outer_message_div);
         message_divs.push(outer_message_div);
         message_container.scrollTop = message_container.scrollHeight;

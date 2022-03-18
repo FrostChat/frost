@@ -6,7 +6,7 @@ from utils.sqlite import Database
 from utils.emojis import shortname_to_emoji, emoji_shortnames
 
 db = Database()
-sio = socketio.Server(cors_allowed_origins="*", transports=["polling", "websocket", "xhr-polling", "jsonp-polling"])
+sio = socketio.Server(cors_allowed_origins="*", transports=["websocket"])
 app = socketio.WSGIApp(sio)
 clients = {}
 
@@ -100,4 +100,8 @@ def message_deleted(sid, data):
     pass
 
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
+    # run the server on port 8080
+    eventlet.wsgi.server(
+        eventlet.listen(('', 8080)),
+        app
+    )

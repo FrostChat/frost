@@ -1,22 +1,9 @@
-const socket = io("http://localhost:8000", {
-    transports: ["websocket"]
-});
+const socket = io("http://localhost:8080", { transports: ["websocket"] });
 
-socket.emit('authenticate', {
-    api_key: self_user.api_key
-});
-
-socket.on('connect', function() {
-    console.log('Connected to server');
-});
-
-socket.on('disconnect', () => {
-    console.log('Disconnected from server');
-})
-
-socket.on('authenticated', () => {
-    console.log('Authenticated');   
-})
+socket.emit('authenticate', { api_key: self_user.api_key });
+socket.on('connected', () => { console.log('Connected to server') });
+socket.on('disconnected', () => { console.log('Disconnected from server') });
+socket.on('authenticated', () => { console.log('Authenticated') });
 
 socket.on('message', function(data) {
     try {

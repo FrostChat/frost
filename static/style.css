@@ -134,6 +134,8 @@ body {
 .message {
     margin-right: auto;
     max-width: 75%;
+    display: flex;
+    align-items: flex-end;
 }
 
 .message.self {
