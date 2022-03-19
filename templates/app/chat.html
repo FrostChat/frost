@@ -86,9 +86,9 @@
         </div>
 
         <script>
-            var self_user = "{{ self_user.to_json(show_api_key=True) }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace("False", "false").replace("True", "true").replace("None", "null");
-            var user = "{{ user.to_json() }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace("False", "false").replace("True", "true").replace("None", "null");
-            var users = "{{ users_json }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace("False", "false").replace("True", "true").replace("None", "null");
+            var self_user = "{{ self_user.to_json(show_api_key=True) }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replaceAll("False", "false").replaceAll("True", "true").replaceAll("None", "null");
+            var user = "{{ user.to_json() }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replaceAll("False", "false").replaceAll("True", "true").replaceAll("None", "null");
+            var users = "{{ users_json }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replaceAll("False", "false").replaceAll("True", "true").replaceAll("None", "null");
             var messages = "{{ messages_json }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace(/&#34;/g, "\"");
             
             self_user = JSON.parse(self_user);
@@ -107,16 +107,13 @@
 
             message_container.scrollTop = message_container.scrollHeight;
 
-            // scroll down till user's div is in view
-            function scroll_to_user_div(user_id) {
-                let user_div = document.getElementById(`user-${user_id}`);
-                users_container.scrollTo(0, user_div.offsetTop - users_container.offsetTop);
+            if (user.is_blocked) {
+                message_box.setAttribute('readonly', 'readonly');
+                message_box.setAttribute('placeholder', 'You have blocked this user.');
+            } else {
+                message_box.removeAttribute('readonly');
+                message_box.setAttribute('placeholder', 'Message {{ user.username }}...');
             }
-
-            setTimeout(() => {
-                // scroll to user div
-                scroll_to_user_div(user.id);
-            }, 100);
         </script>
         <script src="/static/js/search-box.js"></script>
         <script src="/static/js/context-menu.js"></script>
@@ -128,6 +125,7 @@
             render_messages(messages);
             render_users(users);
             reset_notifications_loop();
+            setTimeout(() => { scroll_to_user_div(user.id); }, 100);
         </script>
     </body>
 </html>

@@ -116,7 +116,7 @@
         </div>
 
         <script>
-            var self_user = "{{ self_user.to_json(show_api_key=True) }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replace("False", "false").replace("True", "true").replace("None", "null");
+            var self_user = "{{ self_user.to_json(show_api_key=True) }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replaceAll("False", "false").replaceAll("True", "true").replaceAll("None", "null");
             self_user = JSON.parse(self_user);
         </script>
     </body>
