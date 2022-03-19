@@ -1,9 +1,9 @@
 import eventlet
 import socketio
 import datetime
+import emoji
 
-from utils.sqlite import Database
-from utils.emojis import shortname_to_emoji, emoji_shortnames
+from utils.sqlite import Database, Message
 
 db = Database()
 sio = socketio.Server(cors_allowed_origins="*", transports=["websocket"])
@@ -52,20 +52,23 @@ def send_message(sid, data):
 
     content = content.replace('"', '')
     content = content.replace("'", "")
+    content = content.replace("\n", "{newline}")
+    content = emoji.emojize(content, use_aliases=True)
 
-    # for shortname in emoji_shortnames:
-    #     content = content.replace(shortname, shortname_to_emoji(shortname))
-
-    if content is None or len(content) == 0:
+    if content is None or len(content) == 0 or content == "\\":
         return
 
-    message = db.add_message(content, api_user_id, receiver_id, str(datetime.datetime.now()))
-    reciever_sid = get_sid_from_user_id(receiver_id)
+    if db.is_user_blocked(api_user_id, receiver_id) or db.is_user_blocked(receiver_id, api_user_id):
+        sio.emit("message", {"author_id": "system", "error": "You can't message this user. You have either been blocked or have blocked this user."}, room=sid)
 
-    if reciever_sid is not None:
-        sio.emit("message", message.to_json(), room=reciever_sid)
+    else:
+        message = db.add_message(content, api_user_id, receiver_id, str(datetime.datetime.now()))
+        reciever_sid = get_sid_from_user_id(receiver_id)
 
-    sio.emit("message", message.to_json(), room=sid)
+        if reciever_sid is not None:
+            sio.emit("message", message.to_json(), room=reciever_sid)
+
+        sio.emit("message", message.to_json(), room=sid)
 
 @sio.on('delete_message')
 def delete_message(sid, data):
