@@ -2,11 +2,13 @@ from utils.sqlite import Database, UserExists
 
 db = Database()
 
-username = input("Username: ")
-password = input("Password: ")
+# username = input("Username: ")
+# password = input("Password: ")
 
-db.add_user(username, password)
-print("User added.")
+# db.add_user(username, password)
+# user = db.get_user_by_username(username)
+
+# print(user.to_json(show_api_key=True))
 
 # jim = db.get_user_by_username("jim")
 # bob = db.get_user_by_username("bob")
@@ -17,3 +19,5 @@ print("User added.")
 #     print(e)
 
 # print(db.is_user_muted(jim.id, bob.id))
+
+print(db.get_user("YmVu.NlFnVG5iR3dub3oxN21DVQ=="))
