@@ -48,12 +48,12 @@ function message_content_to_html(content) {
 }
 
 let previous_day;
-function add_message_div(message_obj) {
+function add_message_div(message_obj, system = false) {
     if (message_obj.receiver_id == user.id || message_obj.author_id == user.id) {
         let outer_message_div = document.createElement('div');
         let message_div = document.createElement('div');
         let timestamp = document.createElement('p');
-        let html_message = message_content_to_html(message_obj.content);
+        let html_message = message_content_to_html(message_obj.content.replaceAll("{newline}", "<br>"));
 
         date = new Date(message_obj.timestamp)
 
