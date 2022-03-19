@@ -50,11 +50,20 @@ def get_user(user_id):
         except UserNotFound:
             return flask.jsonify({'error': 'User not found.'}), 404
     
-    user = db.get_user(user_id)
+    user = None
+    api_key_user = None
+    
+    try:
+        user = db.get_user(user_id)
+    except UserNotFound:
+        return flask.jsonify({'error': 'User not found.'}), 404
     if not user:
         return flask.jsonify({'error': 'User not found.'}), 404
 
-    api_key_user = db.api_key_to_user(api_key)
+    try:
+        api_key_user = db.get_user(api_key.split('.')[0])
+    except UserNotFound:
+        return flask.jsonify({'error': 'Invalid API key.'}), 404
     if api_key_user.id != user.id:
         is_user_muted = db.is_user_muted(api_key_user.id, user.id)
         user.is_muted = is_user_muted

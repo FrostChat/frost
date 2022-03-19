@@ -112,6 +112,22 @@ function open_user_contextmenu(event, user_obj) {
         });
     }
 
+    let block_user_div = document.createElement('div');
+    block_user_div.classList.add('item');
+    if (user_obj.is_blocked) {
+        block_user_div.innerText = 'Unblock';
+        block_user_div.addEventListener('click', function () {
+            unblock_user(user_obj.id);
+            close_contextmenu();
+        });
+    } else {
+        block_user_div.innerText = 'Block';
+        block_user_div.addEventListener('click', function () {
+            block_user(user_obj.id);
+            close_contextmenu();
+        });
+    }
+
     let view_profile_div = document.createElement('div');
     view_profile_div.classList.add('item');
     view_profile_div.innerText = 'View profile';
@@ -146,6 +162,7 @@ function open_user_contextmenu(event, user_obj) {
         contextMenu.appendChild(clear_notifications_div);
     }
     contextMenu.appendChild(mute_user_div);
+    contextMenu.appendChild(block_user_div);
     contextMenu.appendChild(view_profile_div);
     contextMenu.appendChild(copy_id_div);
 

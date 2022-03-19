@@ -1,6 +1,19 @@
 let users_container = document.getElementById('users-container');
 let user_divs = [];
 
+function check_block_status(user_obj) {
+    if (user_obj.is_blocked) {
+        msg_box.setAttribute("readonly", "true");
+    } else {
+        msg_box.setAttribute("readonly", "false");
+    }
+}
+
+function scroll_to_user_div(user_id) {
+    let user_div = document.getElementById(`user-${user_id}`);
+    users_container.scrollTo(0, user_div.offsetTop - users_container.offsetTop);
+}
+
 function render_users(users, home_page = false) {
     users.forEach(user_obj => {
         let col_div = document.createElement('div');
@@ -103,6 +116,54 @@ function unmute_user(user_id) {
             user_obj.is_muted = false;
             if (user_id == user.id) {
                 user.is_muted = false;
+            }
+        } else {
+            alert("Error: " + response.statusText);
+        }
+    })
+}
+
+function block_user(user_id) {
+    user_obj = users.find(x => x.id == user_id);
+
+    fetch('/api/user/' + user_id + '/block', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': self_user.api_key
+        }
+    }).then(response => {
+        if (response.ok) {
+            console.log("User blocked");
+            user_obj.is_blocked = true;
+            message_box.setAttribute('readonly', 'readonly');
+            message_box.setAttribute('placeholder', 'You have blocked this user.');
+            if (user_id == user.id) {
+                user.is_blocked = true;
+            }
+        } else {
+            alert("Error: " + response.statusText);
+        }
+    })
+}
+
+function unblock_user(user_id) {
+    user_obj = users.find(x => x.id == user_id);
+
+    fetch('/api/user/' + user_id + '/unblock', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': self_user.api_key
+        }
+    }).then(response => {
+        if (response.ok) {
+            console.log("User unblocked");
+            user_obj.is_blocked = false;
+            message_box.removeAttribute('readonly');
+            message_box.setAttribute('placeholder', `Message ${user_obj.username}...`);
+            if (user_id == user.id) {
+                user.is_blocked = false;
             }
         } else {
             alert("Error: " + response.statusText);

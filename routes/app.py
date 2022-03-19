@@ -18,7 +18,10 @@ def index():
 
     for user in users:
         is_muted = db.is_user_muted(self_user.id, user.id)
+        is_blocked = db.is_user_blocked(self_user.id, user.id)
+
         user.is_muted = is_muted
+        user.is_blocked = is_blocked
 
     users_json = [user.to_json() for user in users]
 
@@ -50,9 +53,15 @@ def chat(user_id):
     self_user = db.get_user_by_username(flask.session['user']['username'])
     users = db.get_users_chats(self_user.id)
 
-    for user in users:
-        is_muted = db.is_user_muted(self_user.id, user.id)
-        user.is_muted = is_muted
+    for user2 in users:
+        is_muted = db.is_user_muted(self_user.id, user2.id)
+        is_blocked = db.is_user_blocked(self_user.id, user2.id)
+
+        user2.is_muted = is_muted
+        user2.is_blocked = is_blocked
+
+    user.is_blocked = db.is_user_blocked(self_user.id, user.id)
+    user.is_muted = db.is_user_muted(self_user.id, user.id)
 
     users_json = [user.to_json() for user in users]
     messages = db.get_messages_between(self_user.id, user.id)
