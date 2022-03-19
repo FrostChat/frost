@@ -28,6 +28,8 @@ class User:
         self.website = website
         self.hash = hash
         self.is_muted = False
+        self.is_blocked = False
+        self.is_friend = False
 
         self.bio = self.bio.replace("\n", "{newline}")
 
@@ -53,6 +55,8 @@ class User:
             "bio": self.bio,
             "website": self.website,
             "is_muted": self.is_muted,
+            "is_blocked": self.is_blocked,
+            "is_friend": self.is_friend,
             "api_key": self.api_key if show_api_key else "",
             "hash": self.hash if show_hash else ""
         }
@@ -71,6 +75,8 @@ class Message:
 
         self.content = self.content.replace('"', '')
         self.content = self.content.replace("'", "")
+        self.content = self.content.replace("\\", "")
+        self.content = self.content.replace("\n", "{newline}")
 
     def __str__(self) -> str:
         return f"{self.content} ({self.timestamp})"
