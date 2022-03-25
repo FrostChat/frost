@@ -5,3 +5,4 @@ desktop-app/*
 static/js/fontawesome.js
 graphics/*
 data/*
+*-test.*
