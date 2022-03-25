@@ -28,7 +28,6 @@ function render_users(users, home_page = false) {
         let card_div = document.createElement('div');
         card_div.classList.add('card');
         card_div.classList.add('chat-card');
-        card_div.style.backgroundColor = "#272727";
         card_div.style.cursor = "pointer";
         card_div.id = "user-" + user_obj.id;
 
@@ -136,8 +135,10 @@ function block_user(user_id) {
         if (response.ok) {
             console.log("User blocked");
             user_obj.is_blocked = true;
-            message_box.setAttribute('readonly', 'readonly');
-            message_box.setAttribute('placeholder', 'You have blocked this user.');
+            try {
+                message_box.setAttribute('readonly', 'readonly');
+                message_box.setAttribute('placeholder', 'You have blocked this user.');
+            } catch {}
             if (user_id == user.id) {
                 user.is_blocked = true;
             }
@@ -160,8 +161,10 @@ function unblock_user(user_id) {
         if (response.ok) {
             console.log("User unblocked");
             user_obj.is_blocked = false;
-            message_box.removeAttribute('readonly');
-            message_box.setAttribute('placeholder', `Message ${user_obj.username}...`);
+            try {
+                message_box.setAttribute('readonly', 'readonly');
+                message_box.setAttribute('placeholder', 'You have blocked this user.');
+            } catch {}
             if (user_id == user.id) {
                 user.is_blocked = false;
             }

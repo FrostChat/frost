@@ -1,4 +1,4 @@
-const socket = io("http://localhost:8080", { transports: ["websocket"] });
+const socket = io("http://localhost:3000", { transports: ["websocket"] });
 
 socket.emit('authenticate', { api_key: self_user.api_key });
 socket.on('connected', () => { console.log('Connected to server') });
