@@ -2,7 +2,8 @@ from utils.sqlite import Database, UserExists
 
 db = Database()
 
-# username = input("Username: ")
+username = input("Username: ")
+theme = input("Theme: ")
 # password = input("Password: ")
 
 # db.add_user(username, password)
@@ -20,4 +21,7 @@ db = Database()
 
 # print(db.is_user_muted(jim.id, bob.id))
 
-print(db.get_user("YmVu.NlFnVG5iR3dub3oxN21DVQ=="))
+# print(db.get_user("YmVu.NlFnVG5iR3dub3oxN21DVQ=="))
+
+user_id = db.get_user_by_username(username).id
+db.set_theme(user_id, theme.lower())
