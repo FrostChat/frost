@@ -15,7 +15,15 @@ function view_profile(user_id) {
     profile_viewer_title.innerText = user.username;
 
     if (user.bio != "") {
-        profile_viewer_biography.innerText = user.bio.replaceAll("{newline}", "\n");
+        let html = marked.parse(user.bio.replaceAll("{newline}", "\n"));
+        html = html.replaceAll("\n", "<br>");
+
+        // remove the <br> from the end if there is one
+        if (html.endsWith("<br>")) {
+            html = html.substring(0, html.length - 4);
+        }
+
+        profile_viewer_biography.innerHTML = html;
         profile_viewer_bio_divider.style.display = "block";
     } else {
         profile_viewer_bio_divider.style.display = "none";

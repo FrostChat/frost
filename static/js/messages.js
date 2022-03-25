@@ -1,9 +1,12 @@
 function send_message() {
-    socket.emit('send_message', {
-        content: message_box.value,
-        receiver_id: user.id
-    });
-    message_box.value = '';
+    if (message_box.value.length > 0) {
+        socket.emit('send_message', {
+            content: message_box.value,
+            receiver_id: user.id
+        });
+        message_box.value = '';
+        message_box.style.height = "28px";
+    }
 }
 
 function delete_message(message, message_div_index) {
@@ -16,35 +19,8 @@ function delete_message(message, message_div_index) {
 }
 
 function message_content_to_html(content) {
-    let html;
-
-    if (content.includes('http://') || content.includes('https://')) {
-        let split_content = content.split(' ');
-        let link_index = split_content.indexOf(split_content.find(x => x.includes('http://') || x.includes('https://')));
-        let link = split_content[link_index];
-        
-        html = `<p style="margin: 0; padding: 0;">${split_content.slice(0, link_index).join(' ')} <a href="${link}" target="_blank">${link}</a> ${split_content.slice(link_index + 1).join(' ')}</p>`;
-
-        if (link.endsWith('.gif') || link.endsWith('.png') || link.endsWith('.jpeg') || link.endsWith('.jpg')) {
-            // let img_tag = '<img src="' + link + '" style="max-width: 100%;"></img>'
-            let img_tag = `
-            <div class="message-img">
-                <img src="${link}" style="max-width: 100%;">
-            </div>
-            `;
-
-            if (html == `<p style="margin: 0; padding: 0;"> <a href="${link}" target="_blank">${link}</a> </p>`) {
-                html = img_tag;
-            } else {
-                html += '<br>' + img_tag;
-            }
-        }
-
-    } else {
-        html = "<p class='p-0 m-0'>" + content + "</p>";
-    }
-
-    return html;
+    let html = marked.parse(content);
+    return html.replaceAll("\n", "<br>");
 }
 
 let previous_day;
@@ -53,7 +29,7 @@ function add_message_div(message_obj, system = false) {
         let outer_message_div = document.createElement('div');
         let message_div = document.createElement('div');
         let timestamp = document.createElement('p');
-        let html_message = message_content_to_html(message_obj.content.replaceAll("{newline}", "<br>"));
+        let html_message = message_content_to_html(message_obj.content.replaceAll("{newline}", "\n"));
 
         date = new Date(message_obj.timestamp)
 
@@ -100,7 +76,7 @@ function render_messages(messages) {
 }
 
 message_box.addEventListener('keyup', function(e) {
-    if (e.keyCode == 13) {
+    if (e.keyCode == 13 && !e.shiftKey) {
         send_message();
     }
 });
