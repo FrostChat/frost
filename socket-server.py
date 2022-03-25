@@ -50,25 +50,23 @@ def send_message(sid, data):
     content = data.get("content")
     receiver_id = data.get("receiver_id")
 
-    content = content.replace('"', '')
-    content = content.replace("'", "")
-    content = content.replace("\n", "{newline}")
-    content = emoji.emojize(content, use_aliases=True)
+    if content.strip():
+        content = content.replace('"', '')
+        content = content.replace("'", "")
+        # content = content.replace("\n", "{newline}")
+        content = emoji.emojize(content, use_aliases=True)
 
-    if content is None or len(content) == 0 or content == "\\":
-        return
+        if db.is_user_blocked(api_user_id, receiver_id) or db.is_user_blocked(receiver_id, api_user_id):
+            sio.emit("message", {"author_id": "system", "error": "You can't message this user. You have either been blocked or have blocked this user."}, room=sid)
 
-    if db.is_user_blocked(api_user_id, receiver_id) or db.is_user_blocked(receiver_id, api_user_id):
-        sio.emit("message", {"author_id": "system", "error": "You can't message this user. You have either been blocked or have blocked this user."}, room=sid)
+        else:
+            message = db.add_message(content, api_user_id, receiver_id, str(datetime.datetime.now()))
+            reciever_sid = get_sid_from_user_id(receiver_id)
 
-    else:
-        message = db.add_message(content, api_user_id, receiver_id, str(datetime.datetime.now()))
-        reciever_sid = get_sid_from_user_id(receiver_id)
+            if reciever_sid is not None:
+                sio.emit("message", message.to_json(), room=reciever_sid)
 
-        if reciever_sid is not None:
-            sio.emit("message", message.to_json(), room=reciever_sid)
-
-        sio.emit("message", message.to_json(), room=sid)
+            sio.emit("message", message.to_json(), room=sid)
 
 @sio.on('delete_message')
 def delete_message(sid, data):
@@ -105,6 +103,6 @@ def message_deleted(sid, data):
 if __name__ == '__main__':
     # run the server on port 8080
     eventlet.wsgi.server(
-        eventlet.listen(('', 8080)),
+        eventlet.listen(('', 3000)),
         app
     )
