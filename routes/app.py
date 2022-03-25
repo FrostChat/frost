@@ -3,6 +3,8 @@ import flask
 import hashlib
 import base64
 
+from psutil import users
+
 from utils.sqlite import Database, UserNotFound
 
 blueprint = flask.Blueprint('app', __name__, url_prefix='/app')
@@ -15,6 +17,7 @@ def index():
         
     self_user = db.get_user_by_username(flask.session['user']['username'])
     users = db.get_users_chats(self_user.id)
+    theme = db.get_theme(self_user.id)
 
     for user in users:
         is_muted = db.is_user_muted(self_user.id, user.id)
@@ -25,7 +28,7 @@ def index():
 
     users_json = [user.to_json() for user in users]
 
-    return flask.render_template('app/app.html', users=users, users_json=users_json, self_user=self_user)
+    return flask.render_template('app/app.html', users=users, users_json=users_json, self_user=self_user, theme=theme)
 
 @blueprint.route('/chat/<user_id>')
 def chat(user_id):
@@ -52,6 +55,7 @@ def chat(user_id):
 
     self_user = db.get_user_by_username(flask.session['user']['username'])
     users = db.get_users_chats(self_user.id)
+    theme = db.get_theme(self_user.id)
 
     for user2 in users:
         is_muted = db.is_user_muted(self_user.id, user2.id)
@@ -66,7 +70,7 @@ def chat(user_id):
     users_json = [user.to_json() for user in users]
     messages = db.get_messages_between(self_user.id, user.id)
 
-    return flask.render_template('app/chat.html', users=users, user=user, users_json=users_json, messages=messages, messages_json=[ msg.to_json() for msg in messages ], self_user=self_user)
+    return flask.render_template('app/chat.html', users=users, user=user, users_json=users_json, messages=messages, messages_json=[ msg.to_json() for msg in messages ], self_user=self_user, theme=theme)
 
 @blueprint.route("/mobile-settings")
 def mobile_settings():
@@ -76,8 +80,9 @@ def mobile_settings():
         return flask.redirect("/")
     
     self_user = db.get_user_by_username(flask.session['user']['username'])
+    theme = db.get_theme(self_user.id)
 
-    return flask.render_template("/app/settings/mobile-settings.html", self_user=self_user)
+    return flask.render_template("/app/settings/mobile-settings.html", self_user=self_user, theme=theme)
 
 @blueprint.route("/settings")
 def settings():
@@ -87,9 +92,10 @@ def settings():
         return flask.redirect("/")
     
     self_user = db.get_user_by_username(flask.session['user']['username'])
+    theme = db.get_theme(self_user.id)
 
     if flask.request.MOBILE:
-        return flask.render_template("/app/settings/mobile-settings.html", self_user=self_user, request=flask.request)
+        return flask.render_template("/app/settings/mobile-settings.html", self_user=self_user, request=flask.request, theme=theme)
 
     return flask.redirect(flask.url_for(".settings_account"))
 
@@ -101,8 +107,11 @@ def settings_account():
         return flask.redirect("/")
     
     self_user = db.get_user_by_username(flask.session['user']['username'])
+    blocked_users = [user.to_json() for user in db.get_blocked_users(self_user.id)]
+    users_json = [user.to_json() for user in db.get_users_chats(self_user.id)]
+    theme = db.get_theme(self_user.id)
 
-    return flask.render_template('app/settings/account.html', self_user=self_user, request=flask.request)
+    return flask.render_template('app/settings/account.html', self_user=self_user, blocked_users=blocked_users, users_json=users_json, request=flask.request, theme=theme)
 
 @blueprint.route("/settings/profile")
 def settings_profile():
@@ -112,5 +121,18 @@ def settings_profile():
         return flask.redirect("/")
     
     self_user = db.get_user_by_username(flask.session['user']['username'])
+    theme = db.get_theme(self_user.id)
 
-    return flask.render_template('app/settings/profile.html', self_user=self_user, request=flask.request)
+    return flask.render_template('app/settings/profile.html', self_user=self_user, request=flask.request, theme=theme)
+
+@blueprint.route("/settings/appearance")
+def settings_appearance():
+    db = Database()
+
+    if 'user' not in flask.session:
+        return flask.redirect("/")
+    
+    self_user = db.get_user_by_username(flask.session['user']['username'])
+    theme = db.get_theme(self_user.id)
+
+    return flask.render_template('app/settings/appearance.html', self_user=self_user, request=flask.request, theme=theme)
