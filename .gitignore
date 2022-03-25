@@ -6,3 +6,4 @@ static/js/fontawesome.js
 graphics/*
 data/*
 *-test.*
+utils/sqlite.py
