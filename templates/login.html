@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Chat App</title>
+        <title>Frost</title>
         
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#181717">
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <link rel="stylesheet" href="/static/style.css">
+        <link rel="stylesheet" href="/static/css/light.css">
         <link rel="manifest" href="manifest.json" />
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     
         <style>
-            /* #login-button {
+            #login-button {
                 position: fixed;
                 bottom: 18px;
                 left: 50%;
@@ -32,12 +32,12 @@
                 #login-button {
                     max-width: 240px;
                 }
-            } */
+            }
         </style>
     </head>
     <body class="m-0" style="height: 100vh; overflow: hidden;">
         <div style="max-width: 425px; width: 100%; height: 100%;" class="mx-auto p-3">
-            <h1 class="text-center my-5 display-1">Chat App</h1>
+            <h1 class="text-center my-5 display-1 fw-bold">Frost</h1>
                 
             {% if error %}
             <div class="alert alert-danger mb-2" style="border-radius: 10px;" role="alert" id="error-alert">{{ error }}</div>
@@ -48,11 +48,11 @@
                     <form action="/login" method="post">
 
                         <div class="form-floating mb-2 mt-2">
-                            <input type="text" name="username" class="form-control" id="floatingInput" placeholder="example" style="background-color: #0000001f; border: none; color: white;">
+                            <input type="text" name="username" class="form-control" id="floatingInput" placeholder="example" style="background-color: #00000007; border: none; color: white;">
                             <label for="floatingInput">Username</label>
                         </div>
                         <div class="form-floating mb-5">
-                            <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" style="background-color: #0000001f; border: none; color: white;">
+                            <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" style="background-color: #00000007; border: none; color: white;">
                             <label for="floatingPassword">Password</label>
                         </div>
                         <button type="submit" class="btn btn-purple py-3 py-3 fw-bold w-100" id="login-button"><h3 class="m-0">Login</h3></button>
@@ -70,6 +70,25 @@
                 setTimeout(() => {
                     location.href = '/';
                 }, 3100);
+            }
+
+            // check if the mobile keyboard is open
+            let username_input = document.getElementById('floatingInput');
+            let password_input = document.getElementById('floatingPassword');
+            let login_button = document.getElementById('login-button');
+
+            function hide_login_button() {login_button.style.display = 'none';}
+            function show_login_button() {login_button.style.display = 'block';}
+
+            if (window.innerWidth < 425) {
+                username_input.addEventListener('focus', hide_login_button);
+                password_input.addEventListener('focus', hide_login_button);
+                username_input.addEventListener('blur', show_login_button);
+                password_input.addEventListener('blur', show_login_button);
+
+                if (username_input.value.length > 0 || password_input.value.length > 0) {
+                    show_login_button();
+                }
             }
         </script>
     </body>
