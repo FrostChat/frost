@@ -17,6 +17,7 @@ class UserNotBlocked(Exception): pass
 class MessageNotFound(Exception): pass
 class EmptyMessage(Exception): pass
 class InvalidBio(Exception): pass
+class InvalidTheme(Exception): pass
 
 class User:
     def __init__(self, username: str, id: str, api_key: str, avatar_url: str, bio: str, website: str, hash: str = "") -> None:
@@ -93,6 +94,7 @@ class Database:
         self.database.execute('CREATE TABLE IF NOT EXISTS muted_users (user_id TEXT, muted_user_id TEXT)')
         self.database.execute('CREATE TABLE IF NOT EXISTS blocked_users (user_id TEXT, blocked_user_id TEXT)')
         self.database.execute('CREATE TABLE IF NOT EXISTS friends (user_id TEXT, friend_id TEXT)')
+        self.database.execute('CREATE TABLE IF NOT EXISTS appearance (user_id TEXT, theme TEXT)')
 
     def close(self) -> None:
         self.database.close()
@@ -191,6 +193,13 @@ class Database:
         is_blocked = self.database.execute('SELECT * FROM blocked_users WHERE user_id = ? AND blocked_user_id = ?', (user_id, blocked_user_id)).fetchone()
         return True if is_blocked else False
 
+    def get_blocked_users(self, user_id: str) -> list:
+        users = []
+        for user in self.database.execute('SELECT * FROM blocked_users WHERE user_id = ?', (user_id,)).fetchall():
+            users.append(self.get_user(user[1]))
+
+        return users
+
     def add_user(self, username: str, password: str, avatar_url: str = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png", bio: str = "", website: str = "") -> User:
         """Adds a user to the database."""
 
@@ -208,9 +217,25 @@ class Database:
             raise InvalidUsername('Username is too short.')
 
         self.database.execute('INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)', (username, hashed_password, user_id, api_key, avatar_url, bio, website))
+        self.database.execute('INSERT INTO appearance VALUES (?, ?)', (user_id, "light"))
         self.database.commit()
 
         return User(username, user_id, api_key, avatar_url, bio, website)
+
+    def get_theme(self, user_id: str):
+        """Get a user's theme."""
+
+        theme = self.database.execute('SELECT * FROM appearance WHERE user_id = ?', (user_id,)).fetchone()
+        return theme[1]
+
+    def set_theme(self, user_id: str, theme: str):
+        """Set a user's theme."""
+
+        if theme.lower() not in ["dark", "light"]:
+            raise InvalidTheme("Theme must be either 'dark' or 'light'.")
+
+        self.database.execute('UPDATE appearance SET theme = ? WHERE user_id = ?', (theme, user_id))
+        self.database.commit()
 
     def change_user_username(self, new_username: str, user_id: str) -> None:
         """Update the username of the user."""

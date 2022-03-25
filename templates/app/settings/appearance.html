@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Frost — Settings (Profile)</title>
+        <title>Frost — Settings (Appearance)</title>
         
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -29,12 +29,12 @@
             <div class="col-lg-3 col-md-4 col-sm-0 h-100 p-0 settings-nav" style="position: relative;">
             {% endif %}
                 <div class="mb-2 p-3 search-box-wrapper" style="padding-bottom: 23px!important; padding-top: 25px!important;">
-                    <h5 class="m-0 p-0" style="margin-left: 10px!important;">Settings</h5>    
+                    <h5 class="m-0 p-0" style="margin-left: 10px!important;">Settings</h5>                        
                 </div>
                 <div class="list-group list-group-flush settings-list">
                     <a class="list-group-item list-group-item-action" style="margin-left: 10px; width: calc(100% - 10px);" href="/app/settings/account">Account</a>
-                    <a class="list-group-item list-group-item-action active" style="margin-left: 10px; width: calc(100% - 10px);" href="/app/settings/profile">Profile</a>
-                    <a class="list-group-item list-group-item-action" style="margin-left: 10px; width: calc(100% - 10px);" href="/app/settings/appearance">Appearance</a>
+                    <a class="list-group-item list-group-item-action" style="margin-left: 10px; width: calc(100% - 10px);" href="/app/settings/profile">Profile</a>
+                    <a class="list-group-item list-group-item-action active" style="margin-left: 10px; width: calc(100% - 10px);" href="/app/settings/appearance">Appearance</a>
                 </div>
             </div>
             <div class="col-lg-9 col-md-8 col-sm-12 h-100 p-0 settings-wrapper">
@@ -55,35 +55,21 @@
                     </div>
 
                     <div class="settings container">
-                        <h3 class="mb-4">Profile</h3>
-                        <div class="row mb-4">
-                            <div class="col-lg-6 col-md-12 col-sm-12 mb-2">
+                        <h3 class="mb-4">Appearance</h3>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12 col-sm-12">
                                 <div class="card">
-                                    <div class="card-body">
-                                        <label class="form-label">Avatar</label>
-                                        <div class="input-group mb-3">
-                                            <input id="avatar-input" type="text" class="form-control" value="{{ self_user.avatar_url }}" style="background-color: #0000001f; border: none; color: white; border-top-right-radius: 0px!important; border-bottom-right-radius: 0px!important;">
-                                            <button class="btn btn-purple" type="button" onclick="update_avatar()" style="border-top-left-radius: 0px!important; border-bottom-left-radius: 0px!important;">Save</button>
+                                    <div class="card-body mx-3">
+                                        <div class="row">
+                                            <div class="col-6 theme-btn" onclick="change_theme('light')">
+                                                <img src="/static/images/light.png" class="img-fluid">
+                                                <p class="mt-3 mb-0 text-center">Light</p>
+                                            </div>
+                                            <div class="col-6 theme-btn" onclick="change_theme('dark')">
+                                                <img src="/static/images/dark.png" class="img-fluid">
+                                                <p class="mt-3 mb-0 text-center">Dark</p>
+                                            </div>
                                         </div>
-
-                                        <label class="form-label">Website</label>
-                                        <div class="input-group mb-3">
-                                            <input id="website-input" type="text" class="form-control" value="{{ self_user.website }}" style="background-color: #0000001f; border: none; color: white; border-top-right-radius: 0px!important; border-bottom-right-radius: 0px!important;">
-                                            <button class="btn btn-purple" type="button" onclick="update_website()" style="border-top-left-radius: 0px!important; border-bottom-left-radius: 0px!important;">Save</button>
-                                        </div>
-
-                                        <label class="form-label">Bio</label>
-                                        <div>
-                                            <textarea id="bio-textarea" class="form-control" style="background-color: #0000001f; border: none; color: white; height: 155px; resize: none;" maxlength="200">{{ self_user.bio.replace("{newline}", "\n") }}</textarea> 
-                                            <button class="btn btn-purple mt-2" type="button" onclick="update_bio()">Save</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-md-12 col-sm-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <img src="{{ self_user.avatar_url }}" class="img-fluid rounded">
                                     </div>
                                 </div>
                             </div>
@@ -95,8 +81,9 @@
 
         <script>
             var self_user = "{{ self_user.to_json(show_api_key=True) }}".replace(/&quot;/g, '"').replace(/&#39;/g, "\"").replaceAll("False", "false").replaceAll("True", "true").replaceAll("None", "null");
-            var self_user = JSON.parse(self_user);
+        
+            self_user = JSON.parse(self_user);
         </script>
-        <script src="/static/js/settings/profile.js"></script>
+        <script src="/static/js/settings/appearance.js"></script>
     </body>
 </html>

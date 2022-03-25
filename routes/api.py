@@ -1,7 +1,7 @@
 import flask
 import hashlib
 
-from utils.sqlite import Database, InvalidBio, UserNotFound, UserMuted, UserNotMuted, UserBlocked, UserNotBlocked
+from utils.sqlite import Database, InvalidBio, UserNotFound, UserMuted, UserNotMuted, UserBlocked, UserNotBlocked, InvalidTheme
 
 blueprint = flask.Blueprint('api', __name__, url_prefix='/api')
 
@@ -107,6 +107,28 @@ def update_user(user_id):
         return flask.jsonify({'success': 'Updated your profile.'}), 200
 
     return flask.jsonify({'error': 'You do not have permission to update this user.'}), 403
+
+@blueprint.patch("/user/@me/settings")
+def update_user_settings():
+    api_key = flask.request.headers.get('Authorization')
+    api_user_id = api_key.split('.')[0]
+    db = Database()
+
+    if not db.valid_api_key(api_key):
+        return flask.jsonify({'error': 'Invalid API key.'}), 403
+
+    api_user = db.get_user(api_user_id)
+    if not api_user:
+        return flask.jsonify({'error': 'User not found.'}), 404
+
+    data = flask.request.get_json()
+    if "theme" in data:
+        try:
+            db.set_theme(api_user.id, data['theme'].lower())
+        except InvalidTheme:
+            return flask.jsonify({'error': 'Theme does not exist.'}), 400
+
+    return flask.jsonify({'success': 'Updated your settings.'}), 200
 
 # @blueprint.route('/user/<user_id>', methods=["GET", "PATCH"])
 # def get_user(user_id):
